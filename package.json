@@ -1,0 +1,39 @@
+{
+  "name": "entrygsm_server",
+  "version": "1.0.0",
+  "description": "EntryGsm's server with koa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeanRoom/entrygsm_server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BeanRoom/entrygsm_server/issues"
+  },
+  "homepage": "https://github.com/BeanRoom/entrygsm_server#readme",
+  "dependencies": {
+    "@koa/cors": "^3.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "cross-env": "^5.2.1",
+    "dotenv": "^8.1.0",
+    "joi": "^14.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.8.1",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "mariadb": "^2.1.0",
+    "nodemon": "^1.19.1",
+    "sequelize": "^5.18.0",
+    "sequelize-cli": "^5.5.1"
+  },
+  "scripts" : {
+    "start" : "cross-env NODE_PATH=src babel-node src/index.js",
+    "dev" : "cross-env NODE_PATH=src nodemon --exec babel-node src/index.js"
+  }
+}
