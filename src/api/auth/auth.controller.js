@@ -21,6 +21,7 @@ export const Register = async (ctx) => {
         number : Joi.number().integer().required(),
         email : Joi.string().required()
     });
+    
 
     const result = Joi.validate(ctx.request.body, Request);
 
@@ -77,7 +78,7 @@ export const Register = async (ctx) => {
     ctx.status = 200;
     ctx.body = {
         "name" : ctx.request.body.name
-    }
+    };
 }
 
 export const Login = async (ctx) => {
