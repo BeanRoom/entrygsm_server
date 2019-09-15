@@ -1,5 +1,5 @@
 export const User = (sequelize, DataTypes) => {
-    return sequelize.define('User', {
+    return sequelize.define('user', {
         user_id : {
             type : DataTypes.INTEGER,
             primaryKey : true,

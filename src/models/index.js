@@ -3,7 +3,7 @@ import path from 'path';
 
 import { User } from './User';
 
-const config = require(path.join(__dirname, '..', 'config', 'config.json'))['ownseo'];
+const config = require(path.join(__dirname, '..', 'config', 'config.json'))['ipse'];
 
 const sequelize = new Sequelize(
     config.database,
