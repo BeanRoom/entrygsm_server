@@ -25,12 +25,14 @@
     "koa-bodyparser": "^4.2.1",
     "koa-router": "^7.4.0",
     "mariadb": "^2.1.0",
+    "nodemailer": "^6.3.0",
+    "nodemailer-smtp-transport": "^2.7.4",
     "nodemon": "^1.19.1",
     "sequelize": "^5.18.0",
     "sequelize-cli": "^5.5.1"
   },
-  "scripts" : {
-    "start" : "cross-env NODE_PATH=src babel-node src/index.js",
-    "dev" : "cross-env NODE_PATH=src nodemon --exec babel-node src/index.js"
+  "scripts": {
+    "start": "cross-env NODE_PATH=src babel-node src/index.js",
+    "dev": "cross-env NODE_PATH=src nodemon --exec babel-node src/index.js"
   }
 }
