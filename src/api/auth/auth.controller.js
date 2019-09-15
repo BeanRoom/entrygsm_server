@@ -172,7 +172,7 @@ export const CheckUserValidate = async (ctx) => {
 
     console.log(`CheckUserValidate - 접속한 유저 키 : ${decoded.user_id}`);
     
-    const founded = await user.findAll({
+    const founded = await user.findOne({
         where : {
             "user_id" : decoded.user_id
         }
@@ -180,8 +180,31 @@ export const CheckUserValidate = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = {
-        "validation" : founded[0].validation
+        "validation" : founded.validation
     }
+}
+
+export const CheckUser = async (ctx) => {
+    const token = ctx.header.token;
+
+    const decoded = await decodeToken(token);
+
+    console.log(`CheckUserValidate - 접속한 유저 키 : ${decoded.user_id}`);
+    
+    const founded = await user.findOne({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    ctx.status = 200;
+    ctx.body = {
+        "name" : founded.name,
+        "school" : founded.school,
+        "grade" : founded.grade,
+        "class" : founded.class,
+        "number" : founded.number
+    };
 }
 
 export const UpdateGeneral = async (ctx) => {
