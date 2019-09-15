@@ -13,7 +13,7 @@ export const Register = async (ctx) => {
     // id를 예시로 들자면 '형식은 string이고, 입력 가능한 것은 alphanum( a-z, A-Z, 0-9 )이고, 최소 6글자 최대 30글자, 무조건 입력되야한다'라는 것을 알 수 있다.
     const Request = Joi.object().keys({
         id : Joi.string().alphanum().min(5).max(20).required(),
-        password : Joi.string().min(8).max(20).required(),
+        password : Joi.string().min(8).max(30).required(),
         name : Joi.string().min(2).max(20).required(),
         school : Joi.string().length(10).required(),
         grade : Joi.number().integer().max(6).required(),
@@ -62,7 +62,7 @@ export const Register = async (ctx) => {
     const password = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
     
     // 데이터베이스에 값을 저장함.  
-    user.create({
+    await user.create({
         "id" : id,
         "password" : password,
         "name" : ctx.request.body.name,
@@ -103,7 +103,7 @@ export const Login = async (ctx) => {
     }
 
     // 데이터베이스에 해당하는 아이디가 있는지 검사합니다.
-    const founded = await account.findAll({
+    const founded = await user.findAll({
         where: {
             id : ctx.request.body.id
         }
@@ -147,9 +147,9 @@ export const Login = async (ctx) => {
 export const CheckUserValidate = async (ctx) => {
     const token = ctx.header.token;
 
-    const decoded = decodeToken(token);
+    const decoded = await decodeToken(token);
 
-    console.log(decoded.user_id);
+    console.log(`CheckUserValidate - 접속한 유저 키 : ${decoded.user_id}`);
     
     const founded = await user.findAll({
         where : {
@@ -161,4 +161,53 @@ export const CheckUserValidate = async (ctx) => {
     ctx.body = {
         "validation" : founded[0].validation
     }
+}
+
+export const UpdateGeneral = async (ctx) => {
+
+    const Request = Joi.object().keys({
+        name : Joi.string().min(2).max(20).required(),
+        school : Joi.string().length(10).required(),
+        grade : Joi.number().integer().max(6).required(),
+        class : Joi.number().integer().required(),
+        number : Joi.number().integer().required(),
+    });
+
+    // 넘어온 body의 형식을 검사한다.
+    const Result = Joi.validate(ctx.request.body, Request);
+
+    // 만약 형식이 불일치한다면, 그 이후 문장도 실행하지 않는다.
+    if(Result.error) {
+        console.log(`Login - Joi 형식 에러`);
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const token = ctx.header.token;
+
+    const decoded = await decodeToken(token);
+    
+    const founded = await user.findOne({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    await founded.update({
+        "name" : ctx.request.body.name,
+        "school" : ctx.request.body.school,
+        "grade" : ctx.request.body.grade,
+        "class" : ctx.request.body.class,
+        "number" : ctx.request.body.number,
+    });
+
+    console.log(`UpdateGeneral - 회원 정보를 수정하였습니다. / 아이디 : ${decoded.user_id}`);
+    
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
+    };
 }

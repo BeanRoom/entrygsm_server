@@ -1,10 +1,11 @@
 import Router from 'koa-router';
-import { Register, Login, CheckUserValidate } from './auth.controller';
+import { Register, Login, CheckUserValidate, UpdateGeneral } from './auth.controller';
 
 const auth = new Router();
 
 auth.post('/register', Register);
 auth.post('/login', Login);
-auth.post('/checkValidation', CheckUserValidate);
+auth.get('/checkValidation', CheckUserValidate);
+auth.patch('/updateGeneral', UpdateGeneral)
 
 export default auth;
