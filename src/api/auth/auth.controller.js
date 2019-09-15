@@ -2,7 +2,7 @@ import Joi from 'joi';
 import crypto from 'crypto';
 import { user } from 'models';
 import { generateToken, decodeToken } from 'lib/token.js';
-import { sendRegisterEmail }from 'lib/sendEmail.js';
+import { sendRegisterEmail, sendPasswordChange }from 'lib/sendEmail.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -124,13 +124,13 @@ export const Login = async (ctx) => {
     }
 
     // 데이터베이스에 해당하는 아이디가 있는지 검사합니다.
-    const founded = await user.findAll({
+    const founded = await user.findOne({
         where: {
             id : ctx.request.body.id
         }
     });
 
-    if(!founded.length){
+    if(founded == null){
         console.log(`Login - 존재하지 않는 계정입니다. / 입력된 아이디 : ${ctx.request.body.id}`);
         ctx.status = 400;
         ctx.body = {
@@ -141,7 +141,7 @@ export const Login = async (ctx) => {
 
     const input = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
 
-    if(founded[0].password != input){
+    if(founded.password != input){
         console.log(`Login - 비밀번호를 틀렸습니다.`);
         ctx.status = 400;
         ctx.body = {
@@ -151,13 +151,13 @@ export const Login = async (ctx) => {
     }
 
     const payload = {
-        user_id : founded[0].user_id
+        user_id : founded.user_id
     };
 
     let token = null;
     token = await generateToken(payload);
 
-    console.log(`Login - 로그인에 성공하였습니다 : 유저 - ${founded[0].user_id}`);
+    console.log(`Login - 로그인에 성공하였습니다 : 유저 - ${founded.user_id}`);
     
     ctx.status = 200;
     ctx.body = {
@@ -275,4 +275,53 @@ export const ConfirmEmail = async (ctx) => {
     ctx.body = {
         "user_id" : account.user_id
     }
+}
+
+export const SendChangePW = async (ctx) => {
+
+    const Request = Joi.object().keys({
+        id : Joi.string().alphanum().min(5).max(50).required()
+    });
+
+    // 넘어온 body의 형식을 검사한다.
+    const Result = Joi.validate(ctx.request.body, Request);
+
+    // 만약 형식이 불일치한다면, 그 이후 문장도 실행하지 않는다.
+    if(Result.error) {
+        console.log(`Login - Joi 형식 에러`);
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const founded = await user.findOne({
+        where : {
+            id : ctx.request.body.id
+        }
+    });
+
+    if(founded == null){
+        console.log(`ChangePassword - 존재하지 않는 계정입니다. / 입력된 아이디 : ${ctx.request.body.id}`);
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "003"
+        }
+        return;
+    }
+
+    // 만약 인증이 안되었을 경우엔???
+
+    sendPasswordChange(founded.email);
+
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : founded.user_id
+    };
+}
+
+
+export const ChangePassword = async (ctx) => {
+
 }
