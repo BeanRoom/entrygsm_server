@@ -42,6 +42,10 @@ export const User = (sequelize, DataTypes) => {
         validation : {
             type : DataTypes.BOOLEAN,
             defaultValue : false
+        },
+        key_for_verify : {
+            type : DataTypes.STRING,
+            allowNull : false
         }
     });
 };
