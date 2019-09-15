@@ -2,6 +2,7 @@ import Joi from 'joi';
 import crypto from 'crypto';
 import { user } from 'models';
 import { generateToken, decodeToken } from 'lib/token.js';
+import { sendRegisterEmail }from 'lib/sendEmail.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -60,6 +61,22 @@ export const Register = async (ctx) => {
 
     // 비밀번호를 crypto 모듈을 이용해서 암호화해줌.
     const password = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
+
+    // 이메일 인증 키를 제작합니다.
+    let verifycode;
+    let key_for_verify;
+    do {
+        let key_one=crypto.randomBytes(256).toString('hex').substr(100, 5);
+        let key_two=crypto.randomBytes(256).toString('base64').substr(50, 5);
+        key_for_verify = key_one+key_two;
+
+        verifycode = await user.findAll({
+            where : {
+                "key_for_verify" : key_for_verify
+            }
+        });
+    }while(verifycode.length);
+    
     
     // 데이터베이스에 값을 저장함.  
     await user.create({
@@ -70,8 +87,12 @@ export const Register = async (ctx) => {
         "grade" : ctx.request.body.grade,
         "class" : ctx.request.body.class,
         "number" : ctx.request.body.number,
-        "email" : ctx.request.body.email
+        "email" : ctx.request.body.email,
+        "key_for_verify" : key_for_verify
     });
+
+    // 이메일 인증을 위해 이메일을 전송하는 부분입니다.
+    sendRegisterEmail(ctx.request.body.email, key_for_verify);
 
     console.log(`Register - 새로운 회원이 저장되었습니다. / 아이디 : ${id}`);
     
@@ -204,10 +225,31 @@ export const UpdateGeneral = async (ctx) => {
         "number" : ctx.request.body.number,
     });
 
-    console.log(`UpdateGeneral - 회원 정보를 수정하였습니다. / 아이디 : ${decoded.user_id}`);
+    console.log(`UpdateGeneral - 회원 정보를 수정하였습니다. / 유저코드 : ${decoded.user_id}`);
     
     ctx.status = 200;
     ctx.body = {
         "user_id" : decoded.user_id
     };
+}
+
+export const ConfirmEmail = async (ctx) => {
+    const key_for_verify = ctx.query.key;
+
+    const account = await user.findOne({
+        where : {
+            "key_for_verify" : key_for_verify
+        }
+    });
+
+    await account.update({
+        "validation" : true
+    });
+
+    console.log(`ConfirmEmail - 이메일 인증이 완료되었습니다. / 유저코드 : ${account.user_id}}`);
+
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : account.user_id
+    }
 }
