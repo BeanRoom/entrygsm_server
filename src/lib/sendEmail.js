@@ -35,3 +35,26 @@ export const sendRegisterEmail = (email, key_for_verify) => {
         smtpTransport.close();
     });
 }
+
+export const sendPasswordChange = (email) => {
+    const url = '';
+
+    const mailOpt = {
+        from : {
+            name : '빈실',
+            address : process.env.email_id
+        },
+        to : email,
+        subject : '[잎새] 비밀번호 변경을 위한 이메일입니다.',
+        html : '<h1>비밀번호 변경을 위해 URL을 클릭하여주세요.</h1><br>'+url
+    };
+
+    smtpTransport.sendMail(mailOpt, (err, res) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(`SendChangePW - 이메일 전송에 성공하였습니다. 이메일 : ${email}`);
+        }
+        smtpTransport.close();
+    });
+}
