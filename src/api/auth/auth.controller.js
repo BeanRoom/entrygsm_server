@@ -324,4 +324,40 @@ export const SendChangePW = async (ctx) => {
 
 export const ChangePassword = async (ctx) => {
 
+    const Request = Joi.object().keys({
+        user_id : Joi.number().integer().required(),
+        password : Joi.string().min(8).max(30).required()
+    });
+    
+
+    const result = Joi.validate(ctx.request.body, Request);
+
+    // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
+    if(result.error) {
+        console.log("Register - Joi 형식 에러")
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const password = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
+
+    const account = await user.findOne({
+        where : {
+            "user_id" : ctx.request.body.user_id
+        }
+    });
+
+    await account.update({
+        "password" : password
+    });
+
+    console.log(`ChangePassword - 비밀번호 변경을 성공하였습니다. / 유저코드 : ${account.user_id}`);
+
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : account.user_id
+    };
 }
