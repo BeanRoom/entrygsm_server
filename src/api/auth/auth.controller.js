@@ -7,6 +7,7 @@ import { sendRegisterEmail, sendPasswordChange }from 'lib/sendEmail.js';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// 회원가입
 export const Register = async (ctx) => {
 
     // Joi 라이브러리를 활용해서 형식을 검사하기 위해 객체를 하나 만들어 줌.
@@ -102,6 +103,7 @@ export const Register = async (ctx) => {
     };
 }
 
+// 로그인
 export const Login = async (ctx) => {
     
     // Joi 라이브러리를 활용해서 형식을 검사하기 위해 객체를 하나 만들어 줌.
@@ -165,6 +167,7 @@ export const Login = async (ctx) => {
     };
 }
 
+// 이메일 인증 여부 확인
 export const CheckUserValidate = async (ctx) => {
     const token = ctx.header.token;
 
@@ -184,6 +187,7 @@ export const CheckUserValidate = async (ctx) => {
     }
 }
 
+// 유저 확인
 export const CheckUser = async (ctx) => {
     const token = ctx.header.token;
 
@@ -207,6 +211,7 @@ export const CheckUser = async (ctx) => {
     };
 }
 
+// 회원 일반 정보 수정
 export const UpdateGeneral = async (ctx) => {
 
     const Request = Joi.object().keys({
@@ -256,6 +261,7 @@ export const UpdateGeneral = async (ctx) => {
     };
 }
 
+// 이메일 인증
 export const ConfirmEmail = async (ctx) => {
     const key_for_verify = ctx.query.key;
 
@@ -277,6 +283,7 @@ export const ConfirmEmail = async (ctx) => {
     }
 }
 
+// 비밀번호 변경 이메일 전송
 export const SendChangePW = async (ctx) => {
 
     const Request = Joi.object().keys({
@@ -321,7 +328,7 @@ export const SendChangePW = async (ctx) => {
     };
 }
 
-
+// 비밀번호 변경
 export const ChangePassword = async (ctx) => {
 
     const Request = Joi.object().keys({
@@ -359,5 +366,57 @@ export const ChangePassword = async (ctx) => {
     ctx.status = 200;
     ctx.body = {
         "user_id" : account.user_id
+    };
+}
+
+// 계정 삭제
+export const DeleteUser = async (ctx) => {
+
+    const Request = Joi.object().keys({
+        password : Joi.string().min(5).max(50).required()
+    });
+
+    // 넘어온 body의 형식을 검사한다.
+    const Result = Joi.validate(ctx.request.body, Request);
+
+    // 만약 형식이 불일치한다면, 그 이후 문장도 실행하지 않는다.
+    if(Result.error) {
+        console.log(`DeleteUser - Joi 형식 에러`);
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const token = ctx.header.token;
+
+    const decoded = await decodeToken(token);
+
+    console.log(`DeleteUser - 접속한 유저 키 : ${decoded.user_id}`);
+
+    const founded = await user.findOne({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    const input = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
+
+    if(founded.password != input){
+        console.log(`DeleteUser - 비밀번호를 틀렸습니다.`);
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "004"
+        }
+        return;
+    }
+
+    founded.destroy();
+
+    console.log(`DeleteUser - 성공하였습니다. / 삭제된 유저 : ${decoded.user_id}`);
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
     };
 }
