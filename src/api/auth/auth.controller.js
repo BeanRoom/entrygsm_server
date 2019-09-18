@@ -17,11 +17,12 @@ export const Register = async (ctx) => {
         id : Joi.string().alphanum().min(5).max(20).required(),
         password : Joi.string().min(8).max(30).required(),
         name : Joi.string().min(2).max(20).required(),
-        school : Joi.string().length(10).required(),
+        school_name : Joi.string().required(),
+        school_seq : Joi.string().required(),
         grade : Joi.number().integer().max(6).required(),
         class : Joi.number().integer().required(),
         number : Joi.number().integer().required(),
-        email : Joi.string().required()
+        email : Joi.string().email().required()
     });
     
 
@@ -39,7 +40,7 @@ export const Register = async (ctx) => {
 
     // 아이디 중복체크
     // 사용자가 입력한 id와 동일한 id가 데이터베이스에 있는지 검사하고, 만약 있다면 exist에 저장함
-    const exist = await user.findAll({
+    const exist = await user.findOne({
         where: {
             id : ctx.request.body.id
         }
@@ -47,7 +48,7 @@ export const Register = async (ctx) => {
 
     // exist의 길이가 0이 아니라면, 중복된 아이디가 있다는 뜻
     // 따라서 만약 중복된 아이디가 있다면, 400 에러코드를 전송하고, body에 002라는 내용을 담아서 보냄
-    if(exist.length){
+    if(exist != null){
         console.log(`Register - 이미 존재하는 아이디입니다. / 입력된 아이디 : ${ctx.request.body.id}`);
 
         ctx.status = 400;
@@ -84,7 +85,8 @@ export const Register = async (ctx) => {
         "id" : id,
         "password" : password,
         "name" : ctx.request.body.name,
-        "school" : ctx.request.body.school,
+        "school_name" : ctx.request.body.school_name,
+        "school_seq" : ctx.request.body.school_seq,
         "grade" : ctx.request.body.grade,
         "class" : ctx.request.body.class,
         "number" : ctx.request.body.number,
@@ -204,7 +206,8 @@ export const CheckUser = async (ctx) => {
     ctx.status = 200;
     ctx.body = {
         "name" : founded.name,
-        "school" : founded.school,
+        "school_name" : founded.school_name,
+        "school_seq" : founded.school_seq,
         "grade" : founded.grade,
         "class" : founded.class,
         "number" : founded.number
@@ -216,7 +219,8 @@ export const UpdateGeneral = async (ctx) => {
 
     const Request = Joi.object().keys({
         name : Joi.string().min(2).max(20).required(),
-        school : Joi.string().length(10).required(),
+        school_name : Joi.string().required(),
+        school_seq : Joi.string().required(),
         grade : Joi.number().integer().max(6).required(),
         class : Joi.number().integer().required(),
         number : Joi.number().integer().required(),
@@ -247,7 +251,8 @@ export const UpdateGeneral = async (ctx) => {
 
     await founded.update({
         "name" : ctx.request.body.name,
-        "school" : ctx.request.body.school,
+        "school_name" : ctx.request.body.school_name,
+        "school_seq" : ctx.request.body.school_seq,
         "grade" : ctx.request.body.grade,
         "class" : ctx.request.body.class,
         "number" : ctx.request.body.number,

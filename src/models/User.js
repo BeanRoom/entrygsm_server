@@ -19,8 +19,12 @@ export const User = (sequelize, DataTypes) => {
             type : DataTypes.STRING(50),
             allowNull : false
         },
-        school : {
-            type : DataTypes.STRING(10),
+        school_name : {
+            type : DataTypes.STRING,
+            allowNull : false
+        },
+        school_seq : {
+            type : DataTypes.STRING,
             allowNull : false
         },
         grade : {
