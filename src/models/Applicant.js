@@ -25,6 +25,13 @@ export const Applicant = (sequelize, DataTypes) => {
         },
         celluar_phone : {
             type : DataTypes.STRING(11)
+        },
+        due_date : {
+            type : DataTypes.DATEONLY
+        },
+        type : {
+            type : DataTypes.ENUM("일반", "마이스터인재", "사회통합", "정원외"),
+            defaultValue : "일반"
         }
     });
 };
