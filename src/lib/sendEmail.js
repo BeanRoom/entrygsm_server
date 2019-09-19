@@ -58,3 +58,26 @@ export const sendPasswordChange = (email) => {
         smtpTransport.close();
     });
 }
+
+export const sendPleaseAnswer = (email) => {
+    const url = '';
+
+    const mailOpt = {
+        from : {
+            name : '빈실',
+            address : process.env.email_id
+        },
+        to : email,
+        subject : '[잎새] 새로운 질문이 들어왔습니다.',
+        html : '<h1>새로운 질문에 대답해주세요.</h1>'
+    };
+
+    smtpTransport.sendMail(mailOpt, (err, res) => {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(`sendPleaseAnswer - 이메일 전송에 성공하였습니다. 이메일 : ${email}`);
+        }
+        smtpTransport.close();
+    });
+}
