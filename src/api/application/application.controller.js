@@ -1,6 +1,8 @@
 import Joi from 'joi';
 import axios from 'axios';
 import urlencode from 'urlencode';
+import { decodeToken } from 'lib/token.js';
+import { user, applicant, protector, teacher} from 'models';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -53,4 +55,61 @@ export const SearchSchoolList = async (ctx) => {
     ctx.body = {
         "list" : search_result
     }
+}
+
+// 지원자 정보 입력
+export const ApplicantInfo = async (ctx) => {
+
+    const Request = Joi.object().keys({
+        sex : Joi.number().min(1).max(2),
+        birthday : Joi.date(),
+        address : Joi.string(),
+        home_phone : Joi.string(),
+        celluar_phone : Joi.string().length(11),
+        due_date : Joi.date(),
+        type : Joi.number()
+    });
+
+    const result = Joi.validate(ctx.request.body, Request);
+
+    // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
+    if(result.error) {
+        console.log("Register - Joi 형식 에러")
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const decoded = await decodeToken(ctx.header.token);
+
+    const saved = await applicant.findOne({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    if(saved == null){
+        ctx.request.body.user_id = decoded.user_id
+
+        await applicant.create(ctx.request.body);
+
+        console.log(`ApplicationInfo - 새로운 원서가 작성되었습니다. 유저id - ${decoded.user_id}`);
+        ctx.status = 200;
+        ctx.body = {
+            "user_id" : decoded.user_id
+        }
+        return;
+    }
+
+    await saved.update(ctx.request.body);
+
+    console.log(`ApplicationInfo - 원서가 갱신되었습니다. 유저id - ${decoded.user_id}`);
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
+    };
+}
+
 }
