@@ -212,3 +212,31 @@ export const TeacherInfo = async (ctx) => {
         "user_id" : decoded.user_id
     };
 }
+
+// 원서 삭제
+export const DeleteApplication = async (ctx) => {
+    const decoded = await decodeToken(ctx.header.token);
+
+    await applicant.destroy({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    await protector.destroy({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    await teacher.destroy({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
+    };
+}
