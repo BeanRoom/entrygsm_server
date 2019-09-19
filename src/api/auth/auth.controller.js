@@ -377,6 +377,24 @@ export const ChangePassword = async (ctx) => {
 // 계정 삭제
 export const DeleteUser = async (ctx) => {
 
+    const token = ctx.header.token;
+
+    const decoded = await decodeToken(token);
+
+    console.log(`DeleteUser - 접속한 유저 키 : ${decoded.user_id}`);
+
+    await founded.destroy();
+
+    console.log(`DeleteUser - 성공하였습니다. / 삭제된 유저 : ${decoded.user_id}`);
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
+    };
+}
+
+// 비밀번호 확인
+export const CheckPassword = async (ctx) => {
+
     const Request = Joi.object().keys({
         password : Joi.string().min(5).max(50).required()
     });
