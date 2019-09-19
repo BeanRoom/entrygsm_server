@@ -189,7 +189,7 @@ export const CheckUserValidate = async (ctx) => {
     }
 }
 
-// 유저 확인
+// 유저 일반 정보 반환
 export const CheckUser = async (ctx) => {
     const token = ctx.header.token;
 
