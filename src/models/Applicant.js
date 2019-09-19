@@ -5,9 +5,6 @@ export const Applicant = (sequelize, DataTypes) => {
             primaryKey : true,
             allowNull : false
         },
-        name : {
-            type : DataTypes.STRING(50)
-        },
         image_url : {
             type : DataTypes.STRING
         },
