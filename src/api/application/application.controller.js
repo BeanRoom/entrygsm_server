@@ -163,4 +163,52 @@ export const ProtectorInfo = async (ctx) => {
     };
 }
 
+// 담임 선생님 정보 입력
+export const TeacherInfo = async (ctx) => {
+
+    const Request = Joi.object().keys({
+        name : Joi.string().min(2).max(20),
+        celluar_phone : Joi.string().length(11)
+    });
+
+    const result = Joi.validate(ctx.request.body, Request);
+
+    // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
+    if(result.error) {
+        console.log("Register - Joi 형식 에러")
+        ctx.status = 400;
+        ctx.body = {
+            "error" : "001"
+        }
+        return;
+    }
+
+    const decoded = await decodeToken(ctx.header.token);
+
+    const saved = await teacher.findOne({
+        where : {
+            "user_id" : decoded.user_id
+        }
+    });
+
+    if(saved == null){
+        ctx.request.body.user_id = decoded.user_id
+
+        await teacher.create(ctx.request.body);
+
+        console.log(`TeacherInfo - 새로운 원서가 작성되었습니다. 유저id - ${decoded.user_id}`);
+        ctx.status = 200;
+        ctx.body = {
+            "user_id" : decoded.user_id
+        }
+        return;
+    }
+
+    await saved.update(ctx.request.body);
+
+    console.log(`TeacherInfo - 원서가 갱신되었습니다. 유저id - ${decoded.user_id}`);
+    ctx.status = 200;
+    ctx.body = {
+        "user_id" : decoded.user_id
+    };
 }
