@@ -5,5 +5,6 @@ const application = new Router();
 
 application.get('/searchSchoolList', SearchSchoolList);
 application.post('/insert/applicant', ApplicantInfo);
+application.post('/insert/protector', ProtectorInfo);
 
 export default application;
