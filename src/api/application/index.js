@@ -1,6 +1,8 @@
 import Router from 'koa-router';
-import { } from './application.controller';
+import { SearchSchoolList } from './application.controller';
 
 const application = new Router();
+
+application.get('/searchSchoolList', SearchSchoolList);
 
 export default application;

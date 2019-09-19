@@ -1,17 +1,20 @@
 import Joi from 'joi';
+import axios from 'axios';
+import urlencode from 'urlencode';
 
 import dotenv from 'dotenv';
 dotenv.config();
 
+// 학교 목록 검색
 export const SearchSchoolList = async (ctx) => {
 
     const Request = Joi.object().keys({
         gubun : Joi.number().max(2).required(),
-        searchSchulNm : Joi.string().required()
+        searchText : Joi.string().required()
     });
 
     // 넘어온 body의 형식을 검사한다.
-    const Result = Joi.validate(ctx.request.body, Request);
+    const Result = Joi.validate(ctx.query, Request);
 
     // 만약 형식이 불일치한다면, 그 이후 문장도 실행하지 않는다.
     if(Result.error) {
@@ -23,14 +26,31 @@ export const SearchSchoolList = async (ctx) => {
         return;
     }
 
-    let gubun;
-    if(ctx.request.body.gubun == 1){
+    let gubun;  
+    if(ctx.query.gubun == 1){
         gubun = "elem_list"
     }else{
-        gubun = "mid_list"
+        gubun = "midd_list"
     }
 
-    const url = 'www.career.go.kr/cnet/openapi/getOpenApi?apiKey='+careernet_key+'&svcType=api&svcCode=SCHOOL&contentType=json&gubun='+gubun+'&searchSchulNm'+ctx.request.body.searchSchulNm;
+    const text = urlencode(ctx.query.searchText);
 
-    
+    const url = `https://www.career.go.kr/cnet/openapi/getOpenApi?apiKey=${process.env.careernet_key}&svcType=api&svcCode=SCHOOL&contentType=json&gubun=${gubun}&searchSchulNm=${text}`;
+
+    const api_result = await axios.get(url);
+    const schoolList = api_result.data.dataSearch.content;
+
+    let search_result = [];
+    for(var i in schoolList){
+        search_result.push({
+            "school_name" : schoolList[i].schoolName,
+            "address" : schoolList[i].adres,
+            "seq" : schoolList[i].seq
+        });
+    }
+
+    ctx.status = 200;
+    ctx.body = {
+        "list" : search_result
+    }
 }
