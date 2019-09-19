@@ -6,7 +6,7 @@ export const Question = (sequelize, DataTypes) => {
             allowNull : false
         },
         kind : {
-            type : DataTypes.ENUM("학교", "기숙사", "원서지원"),
+            type : DataTypes.ENUM("학교생활", "기숙사", "지원과정", "공부", "취업"),
             allowNull : false
         },
         title : {
@@ -20,6 +20,10 @@ export const Question = (sequelize, DataTypes) => {
         created_at : {
             type : DataTypes.DATE,
             defaultValue : DataTypes.NOW
+        },
+        is_answered : {
+            type : DataTypes.BOOLEAN,
+            defaultValue : false
         }
     });
 };
