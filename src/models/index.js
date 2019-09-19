@@ -2,6 +2,7 @@ import Sequelize from 'sequelize';
 import path from 'path';
 
 import { User } from './User';
+import { Applicant } from './Applicant';
 
 const config = require(path.join(__dirname, '..', 'config', 'config.json'))['ipse'];
 
@@ -13,5 +14,6 @@ const sequelize = new Sequelize(
 )
 
 const user = User(sequelize, Sequelize);
+const applicant = Applicant(sequelize, Sequelize);
 
-export { sequelize, Sequelize, user };  
+export { sequelize, Sequelize, user, applicant };  
