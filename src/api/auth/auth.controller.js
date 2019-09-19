@@ -408,20 +408,13 @@ export const DeleteUser = async (ctx) => {
 
     const input = crypto.createHmac('sha256', process.env.Password_KEY).update(ctx.request.body.password).digest('hex');
 
+    let is_correct = true;
     if(founded.password != input){
-        console.log(`DeleteUser - 비밀번호를 틀렸습니다.`);
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "004"
-        }
-        return;
+        is_correct = false;
     }
 
-    founded.destroy();
-
-    console.log(`DeleteUser - 성공하였습니다. / 삭제된 유저 : ${decoded.user_id}`);
     ctx.status = 200;
     ctx.body = {
-        "user_id" : decoded.user_id
+        "is_correct" : is_correct
     };
 }

@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import { Register, Login, CheckUserValidate, CheckUser, UpdateGeneral, ConfirmEmail, SendChangePW, ChangePassword, DeleteUser } from './auth.controller';
+import { Register, Login, CheckUserValidate, CheckUser, UpdateGeneral, ConfirmEmail, SendChangePW, ChangePassword, DeleteUser, CheckPassword } from './auth.controller';
 
 const auth = new Router();
 
@@ -10,6 +10,7 @@ auth.get('/confirmEmail', ConfirmEmail);
 auth.post('/register', Register);
 auth.post('/login', Login);
 auth.post('/sendChangePw', SendChangePW);
+auth.post('/checkPw', CheckPassword);
 
 auth.patch('/updateGeneral', UpdateGeneral);
 auth.patch('/changePw', ChangePassword);
