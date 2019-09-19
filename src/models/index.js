@@ -5,6 +5,7 @@ import { User } from './User';
 import { Applicant } from './Applicant';
 import { Protector } from './Protector';
 import { Teacher } from './Teacher';
+import { Question } from './QNA';
 
 const config = require(path.join(__dirname, '..', 'config', 'config.json'))['ipse'];
 
@@ -19,5 +20,6 @@ const user = User(sequelize, Sequelize);
 const applicant = Applicant(sequelize, Sequelize);
 const protector = Protector(sequelize, Sequelize);
 const teacher = Teacher(sequelize, Sequelize);
+const question = Question(sequelize, Sequelize);
 
-export { sequelize, Sequelize, user, applicant, protector, teacher };  
+export { sequelize, Sequelize, user, applicant, protector, teacher, question };  
