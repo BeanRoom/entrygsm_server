@@ -1,7 +1,9 @@
 import Router from 'koa-router';
-import { uploadQnA, answerQnA} from './qna.controller';
+import { uploadQnA, answerQnA, QnaList} from './qna.controller';
 
 const qna = new Router();
+
+qna.get('/question', QnaList);
 
 qna.post('/question', uploadQnA);
 qna.post('/answer', answerQnA);
