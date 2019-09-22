@@ -97,3 +97,41 @@ export const answerQnA = async (ctx) => {
         "admin_id" : 1
     }
 }
+
+// 전체 질문에 대한 리스트
+export const QnaList = async (ctx) => {
+    const list = await question.findAll();
+
+    const body = [];
+    for(var i in list){
+        let json = {
+            "question_id" : list[i].question_id,
+            "kind" : list[i].kind,
+            "title" : list[i].title,
+            "content" : list[i].content,
+            "created_at" : list[i].created_at
+        };
+
+        if(list[i].is_answered){
+            const a = await answer.findOne({
+                where : {
+                    question_id : list[i].question_id
+                }
+            });
+
+            json.answer = {
+                "answer_id" : a.answer_id,
+                "admin_id" : a.admin_id,
+                "content" : a.content,
+                "created_at" : a.created_at
+            };
+        }
+
+        body.push(json);
+    }
+
+    ctx.status = 200;
+    ctx.body = {
+        list : body
+    };
+}
