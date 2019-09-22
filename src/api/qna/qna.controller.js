@@ -1,11 +1,12 @@
 import Joi from 'joi';
-import { question, answer } from 'models';
-import { sendPleaseAnswer } from 'lib/sendEmail.js';
+import { user, question, answer } from 'models';
+import { sendPleaseAnswer, sendAnswered } from 'lib/sendEmail.js';
 import { decodeToken } from 'lib/token.js';
 
 import dotenv from 'dotenv';
 dotenv.config();
 
+// QnA 업로드하기
 export const uploadQnA = async (ctx) => {
 
     const Request = Joi.object().keys({
@@ -39,6 +40,7 @@ export const uploadQnA = async (ctx) => {
     };
 }
 
+// QnA 답변하기
 export const answerQnA = async (ctx) => {
 
     const Request = Joi.object().keys({
@@ -69,7 +71,10 @@ export const answerQnA = async (ctx) => {
         ctx.body = {
             "error" : "005"
         };
+        return;
     }
+
+    // 관리자 접속 여부를 확인해야 함. ( 임시로 admin_id를 0으로 설정 )
 
     ctx.request.body.admin_id = 1;
 
@@ -78,6 +83,14 @@ export const answerQnA = async (ctx) => {
     await founded.update({
         "is_answered" : true
     });
+
+    const asker = await user.findOne({
+        where : {
+            "user_id" : founded.user_id
+        }
+    });
+
+    sendAnswered(asker.email);
 
     ctx.status = 200;
     ctx.body = {
