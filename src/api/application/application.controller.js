@@ -2,7 +2,8 @@ import Joi from 'joi';
 import axios from 'axios';
 import urlencode from 'urlencode';
 import { decodeToken } from 'lib/token.js';
-import { user, applicant, protector, teacher} from 'models';
+import { savePhoto } from 'lib/uploadPicture.js';
+import { user, application } from 'models';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -45,55 +46,78 @@ export const SearchSchoolList = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = {
-        "list" : search_result
+        "list": search_result
     }
 }
 
-// 지원자 정보 입력
-export const ApplicantInfo = async (ctx) => {
+// 지원서 입력
+export const ApplicationInfo = async (ctx) => {
 
     const Request = Joi.object().keys({
-        sex : Joi.number().min(1).max(2),
-        birthday : Joi.date(),
-        address : Joi.string(),
-        home_phone : Joi.string(),
-        celluar_phone : Joi.string().length(11),
-        due_date : Joi.date(),
-        type : Joi.number()
+        sex: Joi.number().min(1).max(2),
+        birthday: Joi.date(),
+        address: Joi.string(),
+        home_phone: Joi.string(),
+        phone: Joi.string().length(11),
+        graduation_date: Joi.date(),
+        graduation_option: Joi.number().max(3),
+        protector_name: Joi.string().min(2).max(20),
+        relation: Joi.string(),
+        protector_home_phone: Joi.string(),
+        protector_phone: Joi.string().length(11),
+        teacher_name: Joi.string().min(2).max(20),
+        teacher_phone: Joi.string().length(11),
+        school_number: Joi.string(),
+        type: Joi.number().max(5)
     });
 
     const result = Joi.validate(ctx.request.body, Request);
 
     // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
-    if(result.error) {
-        console.log("Register - Joi 형식 에러")
+    if (result.error) {
+        console.log("ApplicationInfo - Joi 형식 에러")
         ctx.status = 400;
         ctx.body = {
-            "error" : "001"
+            "error": "001"
         }
         return;
     }
 
     const decoded = await decodeToken(ctx.header.token);
 
-    const saved = await applicant.findOne({
-        where : {
-            "user_id" : decoded.user_id
+    let file;
+    let url;
+    try {
+        file = ctx.request.files.image;
+
+        url = await savePhoto({
+            fileName: decoded.user_id,
+            filePath: file.path,
+            fileType: file.type
+        });
+
+    } catch (e) {
+        console.log(e.name);
+    }
+
+    const saved = await application.findOne({
+        where: {
+            "user_id": decoded.user_id
         }
     });
 
-    if(saved == null){
-        ctx.request.body.user_id = decoded.user_id
+    if (saved == null) {
+        ctx.request.body.user_id = decoded.user_id;
+        ctx.request.body.image_url = url;
 
-        await applicant.create(ctx.request.body);
+        await application.create(ctx.request.body);
 
         console.log(`ApplicationInfo - 새로운 원서가 작성되었습니다. 유저id - ${decoded.user_id}`);
         ctx.status = 200;
         ctx.body = {
-            "user_id" : decoded.user_id
+            "user_id": decoded.user_id
         }
         return;
-        "list": search_result
     }
 
     await saved.update(ctx.request.body);
@@ -101,108 +125,7 @@ export const ApplicantInfo = async (ctx) => {
     console.log(`ApplicationInfo - 원서가 갱신되었습니다. 유저id - ${decoded.user_id}`);
     ctx.status = 200;
     ctx.body = {
-        "user_id" : decoded.user_id
-    };
-}
-
-// 보호자 정보 입력
-export const ProtectorInfo = async (ctx) => {
-
-    const Request = Joi.object().keys({
-        name : Joi.string().min(2).max(20),
-        relation : Joi.string(),
-        celluar_phone : Joi.string().length(11)
-    });
-
-    const result = Joi.validate(ctx.request.body, Request);
-
-    // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
-    if(result.error) {
-        console.log("Register - Joi 형식 에러")
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "001"
-        }
-        return;
-    }
-
-    const decoded = await decodeToken(ctx.header.token);
-
-    const saved = await protector.findOne({
-        where : {
-            "user_id" : decoded.user_id
-        }
-    });
-
-    if(saved == null){
-        ctx.request.body.user_id = decoded.user_id
-
-        await protector.create(ctx.request.body);
-
-        console.log(`ProtectorInfo - 새로운 원서가 작성되었습니다. 유저id - ${decoded.user_id}`);
-        ctx.status = 200;
-        ctx.body = {
-            "user_id" : decoded.user_id
-        }
-        return;
-    }
-
-    await saved.update(ctx.request.body);
-
-    console.log(`ProtectorInfo - 원서가 갱신되었습니다. 유저id - ${decoded.user_id}`);
-    ctx.status = 200;
-    ctx.body = {
-        "user_id" : decoded.user_id
-    };
-}
-
-// 담임 선생님 정보 입력
-export const TeacherInfo = async (ctx) => {
-
-    const Request = Joi.object().keys({
-        name : Joi.string().min(2).max(20),
-        celluar_phone : Joi.string().length(11)
-    });
-
-    const result = Joi.validate(ctx.request.body, Request);
-
-    // 비교한 뒤 만약 에러가 발생한다면 400 에러코드를 전송하고, body에 001 이라는 내용(우리끼리의 오류 코드 약속)을 담아 joi 오류임을 알려줌
-    if(result.error) {
-        console.log("Register - Joi 형식 에러")
-        ctx.status = 400;
-        ctx.body = {
-            "error" : "001"
-        }
-        return;
-    }
-
-    const decoded = await decodeToken(ctx.header.token);
-
-    const saved = await teacher.findOne({
-        where : {
-            "user_id" : decoded.user_id
-        }
-    });
-
-    if(saved == null){
-        ctx.request.body.user_id = decoded.user_id
-
-        await teacher.create(ctx.request.body);
-
-        console.log(`TeacherInfo - 새로운 원서가 작성되었습니다. 유저id - ${decoded.user_id}`);
-        ctx.status = 200;
-        ctx.body = {
-            "user_id" : decoded.user_id
-        }
-        return;
-    }
-
-    await saved.update(ctx.request.body);
-
-    console.log(`TeacherInfo - 원서가 갱신되었습니다. 유저id - ${decoded.user_id}`);
-    ctx.status = 200;
-    ctx.body = {
-        "user_id" : decoded.user_id
+        "user_id": decoded.user_id
     };
 }
 
@@ -210,26 +133,15 @@ export const TeacherInfo = async (ctx) => {
 export const DeleteApplication = async (ctx) => {
     const decoded = await decodeToken(ctx.header.token);
 
-    await applicant.destroy({
-        where : {
-            "user_id" : decoded.user_id
+    await application.destroy({
+        where: {
+            "user_id": decoded.user_id
         }
     });
 
-    await protector.destroy({
-        where : {
-            "user_id" : decoded.user_id
-        }
-    });
-
-    await teacher.destroy({
-        where : {
-            "user_id" : decoded.user_id
-        }
-    });
-
+    console.log(`DeleteApplication - 삭제에 성공하였습니다. 유저id - ${decoded.user_id}`);
     ctx.status = 200;
     ctx.body = {
-        "user_id" : decoded.user_id
+        "user_id": decoded.user_id
     };
 }
