@@ -16,7 +16,7 @@ export const User = (sequelize, DataTypes) => {
             allowNull : false
         },
         name : {
-            type : DataTypes.STRING(50),
+            type : DataTypes.STRING(20),
             allowNull : false
         },
         school_name : {
@@ -25,18 +25,6 @@ export const User = (sequelize, DataTypes) => {
         },
         school_seq : {
             type : DataTypes.STRING,
-            allowNull : false
-        },
-        grade : {
-            type : DataTypes.INTEGER,
-            allowNull : false
-        },
-        class : {
-            type : DataTypes.INTEGER,
-            allowNull : false
-        },
-        number : {
-            type : DataTypes.INTEGER,
             allowNull : false
         },
         email : {
