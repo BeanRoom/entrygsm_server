@@ -145,3 +145,26 @@ export const DeleteApplication = async (ctx) => {
         "user_id": decoded.user_id
     };
 }
+
+// 작성 중이던 원서 로드
+export const ApplicationLoad = async (ctx) => {
+
+    const decoded = await decodeToken(ctx.header.token);
+
+    const saved = await application.findOne({
+        user_id : decoded.user_id
+    });
+
+    let data;
+
+    data = saved;
+
+    if(saved.user_id != decoded.user_id){
+        data = {};
+    }
+
+    ctx.status = 200;
+    ctx.body = {
+        "data" : data
+    };
+}
