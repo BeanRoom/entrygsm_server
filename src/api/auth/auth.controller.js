@@ -19,9 +19,6 @@ export const Register = async (ctx) => {
         name : Joi.string().min(2).max(20).required(),
         school_name : Joi.string().required(),
         school_seq : Joi.string().required(),
-        grade : Joi.number().integer().max(6).required(),
-        class : Joi.number().integer().required(),
-        number : Joi.number().integer().required(),
         email : Joi.string().email().required()
     });
     
@@ -87,9 +84,6 @@ export const Register = async (ctx) => {
         "name" : ctx.request.body.name,
         "school_name" : ctx.request.body.school_name,
         "school_seq" : ctx.request.body.school_seq,
-        "grade" : ctx.request.body.grade,
-        "class" : ctx.request.body.class,
-        "number" : ctx.request.body.number,
         "email" : ctx.request.body.email,
         "key_for_verify" : key_for_verify
     });
